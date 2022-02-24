@@ -1,11 +1,25 @@
 #!/usr/bin/python3
 import os
-os.sys.path.append("/Users/mdewidar/opt/anaconda3/lib/python3.9/site-packages")
+# os.sys.path.append("/Users/mdewidar/opt/anaconda3/lib/python3.9/site-packages")
 from scapy.all import *
 import subprocess
+import pandas as pd
 
 spoofed_src = "216.58.194.206"
-icmp_responders_list = ["139.130.4.5", "8.8.8.8", "8.8.4.4"]
+
+'''
+    gets a list of the ips in a given csv filename in the column "saddr"
+    -- This is really non-general bad code lol
+''' 
+def get_ips_from_csv(filename):
+    columns = ["saddr"]
+    df = pd.read_csv(filename, usecols=columns)
+    IPs = df["saddr"].to_list() #will have repeated IPs if the data contains them
+    print(IPs[:100])
+    return IPs
+
+#hardcoded for the current layout of the vms filesystem
+icmp_responders_list = get_ips_from_csv("/home/../../mnt/scratch/cs356_icmp/icmp_results.csv")
 
 ''' 
     TODO: This is supposed to get public ip address of host.

@@ -11,7 +11,7 @@ import struct
 
 # spoofed_src = "216.58.194.206"
 
-def get_broadcast_ips(ip):
+def get_broadcast_address_ips(ip):
     broadcast_ips = []
     #convert ip to binary format
     binary_ip = socket.inet_aton(ip)
@@ -78,7 +78,7 @@ def main(addrs = icmp_responders_list):
 
 
 def test_broadcast_ip(ip='192.234.51.136'):
-    result = get_broadcast_ips(ip)
+    result = get_broadcast_address_ips(ip)
     print(result)
 
 

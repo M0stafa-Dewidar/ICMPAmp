@@ -32,7 +32,7 @@ def get_broadcast_address_ips(ip):
 ''' 
 def get_ips_from_csv(filename):
     columns = ["saddr"]
-    df = pd.read_csv(filename, usecols=columns)
+    df = pd.read_csv(filename, usecols=columns, nrows=10000)
     IPs = df["saddr"].to_list() #will have repeated IPs if the data contains them
     print(IPs[:100])
     return IPs
@@ -40,6 +40,12 @@ def get_ips_from_csv(filename):
 #hardcoded for the current layout of the vms filesystem
 csvfilename = "/home/../../mnt/scratch/cs356_icmp/icmp_results.csv"
 icmp_responders_list = get_ips_from_csv(filename=csvfilename)
+icmp_broadcast_addresses = []
+for ip in icmp_responders_list:
+    icmp_broadcast_addresses.extend(get_broadcast_address_ips(ip)) #concatenate this list to the previous one
+
+icmp_broadcast_addresses = set(icmp_broadcast_addresses)
+icmp_broadcast_addresses = list(icmp_broadcast_addresses)
 
 ''' 
     TODO: This is supposed to get public ip address of host.
@@ -71,9 +77,9 @@ def send_ICMP_packet(dst):
     @param addrs = list of ip addresses to ping
 '''
 
-def main(addrs = icmp_responders_list):
+def main(addrs = icmp_broadcast_addresses):
     pool = mp.Pool(mp.cpu_count())
-    results = [pool.apply(send_ICMP_packet,args=(dst)) for dst in addrs]
+    results = pool.map(send_ICMP_packet, [dst for dst in addrs])
     pool.close()
 
 

@@ -4,8 +4,13 @@ import os
 from scapy.all import *
 import subprocess
 import pandas as pd
+import multiprocessing as mp
+
 
 # spoofed_src = "216.58.194.206"
+
+def get_broadcast_ip(ip):
+    pass
 
 '''
     gets a list of the ips in a given csv filename in the column "saddr"
@@ -52,9 +57,14 @@ def send_ICMP_packet(dst):
 '''
 
 def main(addrs = icmp_responders_list):
-    for i in range(len(addrs)):
-        dst = addrs[i]
-        send_ICMP_packet(dst)
+    pool = mp.Pool(mp.cpu_count())
+    results = [pool.apply(send_ICMP_packet,args=(dst)) for dst in addrs]
+    
+    # for i in range(len(addrs)):
+    #     dst = addrs[i]
+    #     send_ICMP_packet(dst)
+
+    pool.close()
 
 
 

@@ -5,12 +5,26 @@ from scapy.all import *
 import subprocess
 import pandas as pd
 import multiprocessing as mp
+import socket
+import struct
 
 
 # spoofed_src = "216.58.194.206"
 
-def get_broadcast_ip(ip):
-    pass
+def get_broadcast_ips(ip):
+    broadcast_ips = []
+    #convert ip to binary format
+    binary_ip = socket.inet_aton(ip)
+    binary_ip = struct.unpack("!L", binary_ip)[0]
+    #try each different subnet mask
+    for i in range(1,33):
+        reverse_subnet_mask = (1 << i) - 1 #need to figure out how to get a mask of all 1
+        broadcast_ip = binary_ip | reverse_subnet_mask
+        broadcast_ip = socket.inet_ntoa(struct.pack('!L', broadcast_ip))
+        broadcast_ips.append(broadcast_ip)
+    return broadcast_ips
+
+
 
 '''
     gets a list of the ips in a given csv filename in the column "saddr"
@@ -24,7 +38,8 @@ def get_ips_from_csv(filename):
     return IPs
 
 #hardcoded for the current layout of the vms filesystem
-icmp_responders_list = get_ips_from_csv("/home/../../mnt/scratch/cs356_icmp/icmp_results.csv")
+csvfilename = "/home/../../mnt/scratch/cs356_icmp/icmp_results.csv"
+icmp_responders_list = get_ips_from_csv(filename=csvfilename)
 
 ''' 
     TODO: This is supposed to get public ip address of host.
@@ -59,14 +74,14 @@ def send_ICMP_packet(dst):
 def main(addrs = icmp_responders_list):
     pool = mp.Pool(mp.cpu_count())
     results = [pool.apply(send_ICMP_packet,args=(dst)) for dst in addrs]
-    
-    # for i in range(len(addrs)):
-    #     dst = addrs[i]
-    #     send_ICMP_packet(dst)
-
     pool.close()
 
+
+def test_broadcast_ip(ip='192.234.51.136'):
+    result = get_broadcast_ips(ip)
+    print(result)
 
 
 if __name__ == '__main__':
     main()
+

@@ -5,7 +5,7 @@ from scapy.all import *
 import subprocess
 import pandas as pd
 
-spoofed_src = "216.58.194.206"
+# spoofed_src = "216.58.194.206"
 
 '''
     gets a list of the ips in a given csv filename in the column "saddr"
@@ -39,9 +39,8 @@ def get_host_ip_addr():
     @param dst = destination address assigned to outgoing ICMP packet
     
 '''
-def send_ICMP_packet(src, dst):
+def send_ICMP_packet(dst):
     ip = IP()
-    ip.src = src
     ip.dst = dst
     icmp = ICMP()
     packet = ip/icmp
@@ -54,9 +53,8 @@ def send_ICMP_packet(src, dst):
 
 def main(addrs = icmp_responders_list):
     for i in range(len(addrs)):
-        src = spoofed_src
         dst = addrs[i]
-        send_ICMP_packet(src,dst)
+        send_ICMP_packet(dst)
 
 
 
